@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -25,7 +26,6 @@ function Tasks() {
     try {
       await axios.post("api/tasks", newTask);
     } catch (error) {
-      console.error(error);
       errorToast("An error occurred while adding the task");
 
       // remove the errored task from the UI
@@ -51,7 +51,6 @@ function Tasks() {
     try {
       await axios.put(`api/tasks/${id}`, { title });
     } catch (error) {
-      console.error(error);
       errorToast("An error occurred while updating the task");
 
       // revert the title change
@@ -73,7 +72,6 @@ function Tasks() {
     try {
       await axios.delete(`api/tasks/${id}`);
     } catch (error) {
-      console.error(error);
       errorToast("An error occurred while deleting the task");
 
       // add the task back to the UI
@@ -97,7 +95,6 @@ function Tasks() {
     try {
       await axios.put(`api/tasks/${id}`, { completed: newCompletionStatus });
     } catch (error) {
-      console.error(error);
       errorToast("An error occurred while updating the task");
 
       // add the task back to the UI
@@ -112,7 +109,6 @@ function Tasks() {
         const tasks = response.data;
         setTasks(tasks);
       } catch (error) {
-        console.error(error);
         errorToast("Failed to retrieve tasks");
       } finally {
         setLoading(false);
