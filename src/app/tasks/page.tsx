@@ -47,7 +47,25 @@ function Tasks() {
 
   const deleteTask = (id: string) => {};
 
-  const toggleTaskCompletion = (id: string) => {};
+  const toggleTaskCompletion = async (id: string) => {
+    const task = tasks.find((task) => task.id === id);
+    const newCompletionStatus = !task?.completed;
+
+    // Optimistically update the UI
+    const updatedTasks = tasks.map((task) =>
+      task.id === id ? { ...task, completed: newCompletionStatus } : task
+    );
+    setTasks(updatedTasks);
+
+    // Then update the server
+    try {
+      await axios.put(`api/tasks/${id}`, { completed: newCompletionStatus });
+    } catch (error) {
+      console.log("IN error block!");
+      // console.log(error);
+      // TODO: Handle error
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
