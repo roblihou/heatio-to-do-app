@@ -8,11 +8,20 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const id = (await params).id;
-  console.log({ id });
   const body = await request.json();
-  console.log({ body });
 
   const response = await axios.put(`${baseUrl}/tasks/${id}`, body);
   const { data } = await response.data;
   return NextResponse.json(data);
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const id = (await params).id;
+
+  await axios.delete(`${baseUrl}/tasks/${id}`);
+
+  return NextResponse.json({});
 }

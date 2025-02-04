@@ -45,7 +45,20 @@ function Tasks() {
     }
   };
 
-  const deleteTask = (id: string) => {};
+  const deleteTask = (id: string) => {
+    console.log("deleteTask", id);
+    // Optimistically update the UI
+    const updatedTasks = tasks.filter((task) => id !== task.id);
+    setTasks(updatedTasks);
+
+    // Then update the server
+    try {
+      axios.delete(`api/tasks/${id}`);
+    } catch (error) {
+      console.log("IN error block!");
+      // console.log(error);
+    }
+  };
 
   const toggleTaskCompletion = async (id: string) => {
     const task = tasks.find((task) => task.id === id);
