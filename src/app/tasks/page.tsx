@@ -28,7 +28,22 @@ function Tasks() {
     }
   };
 
-  const updateTaskTitle = ({ id, title }: Pick<Task, "id" | "title">) => {};
+  const updateTaskTitle = async ({ id, title }: Pick<Task, "id" | "title">) => {
+    // Optimistically update the UI
+    const updatedTasks = tasks.map((task) =>
+      task.id === id ? { ...task, title } : task
+    );
+    setTasks(updatedTasks);
+
+    // Then update the server
+    try {
+      await axios.put(`api/tasks/${id}`, { title });
+    } catch (error) {
+      console.log("IN error block!");
+      // console.log(error);
+      // TODO: Handle error
+    }
+  };
 
   const deleteTask = (id: string) => {};
 
