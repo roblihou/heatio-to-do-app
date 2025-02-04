@@ -23,5 +23,5 @@ export async function DELETE(
 
   await axios.delete(`${baseUrl}/tasks/${id}`);
 
-  return NextResponse.json({});
+  return NextResponse;
 }

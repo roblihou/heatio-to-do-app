@@ -5,62 +5,83 @@ import { Task } from "@/types/task";
 import ListItem from "./components/ListItem";
 import AddItem from "./components/AddItem";
 import axios from "axios";
+import errorToast from "@/utils/errorToast";
 
 function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focussedTaskId, setFocussedTaskId] = useState<string | null>(null);
 
   const addTask = async ({ title, completed }: Omit<Task, "id">) => {
-    const uuid = crypto.randomUUID();
-    const newTask = { id: uuid, title, completed: !!completed };
+    const id = crypto.randomUUID();
+    const newTask = { id, title, completed: !!completed };
 
     // Optimistically update the UI
     setTasks([...tasks, newTask]);
-    setFocussedTaskId(uuid);
+    setFocussedTaskId(id);
 
-    // Then update the server
+    // Then attempt to update the server
     try {
       await axios.post("api/tasks", newTask);
     } catch (error) {
-      console.log("IN error block!");
-      // console.log(error);
-      // TODO: Handle error
+      console.error(error);
+      errorToast("An error occurred while adding the task");
+
+      // remove the errored task from the UI
+      const updatedTasks = tasks.filter((task) => id !== task.id);
+      setTasks(updatedTasks);
     }
   };
 
   const updateTaskTitle = async ({ id, title }: Pick<Task, "id" | "title">) => {
+    const task = tasks.find((task) => task.id === id);
+    if (!task) return;
+
+    const oldTitle = task.title;
+    if (title === oldTitle) return;
+
     // Optimistically update the UI
     const updatedTasks = tasks.map((task) =>
       task.id === id ? { ...task, title } : task
     );
     setTasks(updatedTasks);
 
-    // Then update the server
+    // Then attempt to update the server
     try {
       await axios.put(`api/tasks/${id}`, { title });
     } catch (error) {
-      console.log("IN error block!");
-      // console.log(error);
-      // TODO: Handle error
+      console.error(error);
+      errorToast("An error occurred while updating the task");
+
+      // revert the title change
+      const updatedTasks = tasks.map((task) =>
+        task.id === id ? { ...task, title: oldTitle } : task
+      );
+      setTasks(updatedTasks);
     }
   };
 
-  const deleteTask = (id: string) => {
-    console.log("deleteTask", id);
+  const deleteTask = async (id: string) => {
+    const oldTasks = tasks;
+
     // Optimistically update the UI
     const updatedTasks = tasks.filter((task) => id !== task.id);
     setTasks(updatedTasks);
 
-    // Then update the server
+    // Then attempt to update the server
     try {
-      axios.delete(`api/tasks/${id}`);
+      await axios.delete(`api/tasks/${id}`);
     } catch (error) {
-      console.log("IN error block!");
-      // console.log(error);
+      console.error(error);
+      errorToast("An error occurred while deleting the task");
+
+      // add the task back to the UI
+      setTasks(oldTasks);
     }
   };
 
   const toggleTaskCompletion = async (id: string) => {
+    const oldTasks = tasks;
+
     const task = tasks.find((task) => task.id === id);
     const newCompletionStatus = !task?.completed;
 
@@ -70,21 +91,28 @@ function Tasks() {
     );
     setTasks(updatedTasks);
 
-    // Then update the server
+    // Then attempt to update the server
     try {
       await axios.put(`api/tasks/${id}`, { completed: newCompletionStatus });
     } catch (error) {
-      console.log("IN error block!");
-      // console.log(error);
-      // TODO: Handle error
+      console.error(error);
+      errorToast("An error occurred while updating the task");
+
+      // add the task back to the UI
+      setTasks(oldTasks);
     }
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await axios("api/tasks");
-      const result = response.data;
-      setTasks(result);
+      try {
+        const response = await axios("api/tasks");
+        const tasks = response.data;
+        setTasks(tasks);
+      } catch (error) {
+        console.error(error);
+        errorToast("Failed to retrieve tasks");
+      }
     };
     fetchData();
   }, []);

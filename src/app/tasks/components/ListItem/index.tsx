@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Delete from "@/components/buttons/Delete";
 import { Task } from "@/types/task";
 import CheckBox from "@/components/inputs/Checkbox";
@@ -26,6 +26,10 @@ export default function ListItem({
   onEnter,
 }: Props) {
   const [title, setTitle] = useState(task.title);
+
+  useEffect(() => {
+    setTitle(task.title);
+  }, [task]);
 
   return (
     <li key={index} className="flex items-center mb-2">
