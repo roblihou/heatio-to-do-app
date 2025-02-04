@@ -6,10 +6,12 @@ import ListItem from "./components/ListItem";
 import AddItem from "./components/AddItem";
 import axios from "axios";
 import errorToast from "@/utils/errorToast";
+import Loading from "@/components/activityIndicators/Loading";
 
 function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focussedTaskId, setFocussedTaskId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const addTask = async ({ title, completed }: Omit<Task, "id">) => {
     const id = crypto.randomUUID();
@@ -112,6 +114,8 @@ function Tasks() {
       } catch (error) {
         console.error(error);
         errorToast("Failed to retrieve tasks");
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -120,6 +124,10 @@ function Tasks() {
   const incompleteTasks = tasks.filter((task) => !task.completed);
 
   const completedTasks = tasks.filter((task) => task.completed);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div className="max-w-md mx-auto mt-10 p-4 bg-heatio-tile-blue rounded-lg shadow-lg border border-heatio-border-blue">
