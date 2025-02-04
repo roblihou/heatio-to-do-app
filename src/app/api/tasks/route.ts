@@ -1,15 +1,17 @@
 import axios from "axios";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const baseUrl = process.env.BASE_URL;
 
 export async function GET() {
-  try {
-    const response = await axios(`${baseUrl}/tasks`);
-    const { data } = await response.data;
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Error fetching data" });
-  }
+  const response = await axios(`${baseUrl}/tasks`);
+  const { data } = await response.data;
+  return NextResponse.json(data);
+}
+
+export async function POST(request: NextRequest) {
+  const task = await request.json();
+  const response = await axios.post(`${baseUrl}/tasks`, task);
+  const { data } = await response.data;
+  return NextResponse.json(data);
 }

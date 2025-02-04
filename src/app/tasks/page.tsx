@@ -10,7 +10,23 @@ function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [focussedTaskId, setFocussedTaskId] = useState<string | null>(null);
 
-  const addTask = ({ title, completed }: Omit<Task, "id">) => {};
+  const addTask = async ({ title, completed }: Omit<Task, "id">) => {
+    const uuid = crypto.randomUUID();
+    const newTask = { id: uuid, title, completed: !!completed };
+
+    // Optimistically update the UI
+    setTasks([...tasks, newTask]);
+    setFocussedTaskId(uuid);
+
+    // Then update the server
+    try {
+      await axios.post("api/tasks", newTask);
+    } catch (error) {
+      console.log("IN error block!");
+      // console.log(error);
+      // TODO: Handle error
+    }
+  };
 
   const updateTaskTitle = ({ id, title }: Pick<Task, "id" | "title">) => {};
 
@@ -22,7 +38,6 @@ function Tasks() {
     const fetchData = async () => {
       const response = await axios("api/tasks");
       const result = response.data;
-      console.log("result:", result);
       setTasks(result);
     };
     fetchData();
